@@ -66,7 +66,6 @@ Better
 
 ::
 
-    git clone https://github.com/dz0ny/leapcast.git
     cd ./leapcast
     sudo apt-get install virtualenvwrapper python-pip python-twisted-web python2.7-dev
     mkvirtualenv leapcast
@@ -102,11 +101,3 @@ https://plus.google.com/100317092290545434762/posts/8RjWfMXxje8
 
 |Bitdeli Badge|
 
-.. |Flattr this git repo| image:: http://api.flattr.com/button/flattr-badge-large.png
-   :target: https://flattr.com/submit/auto?user_id=dz0ny&url=https://github.com/dz0ny/leapcast&title=Leapcast&language=&tags=github&category=software
-.. |Build Status| image:: https://travis-ci.org/dz0ny/leapcast.png?branch=master
-   :target: https://travis-ci.org/dz0ny/leapcast
-.. |Stats| image:: https://ga-beacon.appspot.com/UA-46813385-1/dz0ny/leapcast
-   :target: https://github.com/dz0ny/leapcast
-.. |Bitdeli Badge| image:: https://piwik-ubuntusi.rhcloud.com/piwik.php?idsite=2&rec=1
-   :target: https://bitdeli.com/free

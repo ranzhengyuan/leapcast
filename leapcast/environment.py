@@ -36,7 +36,7 @@ def _get_chrome_path():
 class Environment(object):
     channels = dict()
     global_status = dict()
-    friendlyName = 'leapcast'
+    friendlyName = 'ranzhymacosxcast'
     user_agent = 'Mozilla/5.0 (CrKey - 0.9.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1573.2 Safari/537.36'
     chrome = _get_chrome_path()
     fullscreen = False
@@ -45,7 +45,7 @@ class Environment(object):
     uuid = None
     ips = []
     apps = None
-    verbosity = logging.INFO
+    verbosity = logging.NOTSET
 
 
 def parse_cmd():

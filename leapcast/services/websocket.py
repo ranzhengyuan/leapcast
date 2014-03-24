@@ -27,7 +27,7 @@ class App(object):
 
     @classmethod
     def get_instance(cls, app):
-
+        logging.info("%s get_instance %s" % (cls, app))
         if app in Environment.channels:
             return Environment.channels[app]
         else:
@@ -99,8 +99,10 @@ class App(object):
 
     def create_application_channel(self, data):
         if self.get_control_channel():
+            logging.info("APP create_application_channel channel=[%s]" % (self.get_control_channel()))
             self.get_control_channel().new_request()
         else:
+            logging.info("APP create_application_channel data=[%s]" % (data))
             CreateChannel(self.name, data, self.lock).start()
 
     def stop(self):
@@ -132,9 +134,15 @@ class CreateChannel (threading.Thread):
         self.lock = lock
 
     def run(self):
+        logging.info("CreateChannel 1 run data=[%s]" % (self.data))
+        if App.get_instance(self.name).get_control_channel():
+            logging.info("CreateChannel 1 run channel=[%s]" % (App.get_instance(self.name).get_control_channel()))
         # self.lock.wait(30)
         self.lock.clear()
         self.lock.wait()
+        logging.info("CreateChannel 2 run data=[%s]" % (self.data))
+        if App.get_instance(self.name).get_control_channel():
+            logging.info("CreateChannel 2 run channel=[%s]" % (App.get_instance(self.name).get_control_channel()))
         App.get_instance(
             self.name).get_control_channel().new_request(self.data)
 
@@ -148,12 +156,15 @@ class ServiceChannel(tornado.websocket.WebSocketHandler):
     buf = list()
 
     def open(self, app=None):
+        logging.info("ServiceChannel open, app=[%s]" % (app))
         self.app = App.get_instance(app)
         self.app.set_control_channel(self)
         while len(self.buf) > 0:
             self.reply(self.buf.pop())
 
     def on_message(self, message):
+        logging.info("ServiceChannel on_message, message=[%s]" % (message))
+        logging.info("ServiceChannel on_message, remote=[%s]" % (self.request.remote_ip))
         cmd = json.loads(message)
         if cmd["type"] == "REGISTER":
             self.app.lock.set()
@@ -163,6 +174,7 @@ class ServiceChannel(tornado.websocket.WebSocketHandler):
             self.new_channel()
 
     def reply(self, msg):
+        logging.info("ServiceChannel reply, message=[%s], self.ws_connection=[%s]" % (msg, self.ws_connection))
         if isinstance(self.ws_connection, type(None)):
             self.buf.append(msg)
         else:
@@ -181,7 +193,7 @@ class ServiceChannel(tornado.websocket.WebSocketHandler):
         )
 
     def new_request(self, data=None):
-        logging.info("CHANNELREQUEST for app %s" % (self.app.info["name"]))
+        logging.info("CHANNELREQUEST for app %s, data=[%s]" % (self.app.info["name"], data))
         if data:
             try:
                 data = json.loads(data)
@@ -234,6 +246,7 @@ class ReceiverChannel(WSC):
     '''
 
     def open(self, app=None):
+        logging.info("ReceiverChannel open, app=[%s]" % (app))
         super(ReceiverChannel, self).open(app)
         self.app.add_receiver(self)
 
@@ -243,6 +256,8 @@ class ReceiverChannel(WSC):
 
     def on_message(self, message):
         channel = self.app.get_app_channel(self)
+        logging.info("ReceiverChannel on_message, remote=[%s]" % (self.request.remote_ip))
+        logging.info("ReceiverChannel on_message, message=[%s], channel=[%s]" % (message, channel))
         if channel:
             queue = self.app.get_deque(self)
             while len(queue) > 0:
@@ -256,6 +271,7 @@ class ReceiverChannel(WSC):
 
     def on_close(self):
         channel = self.app.get_app_channel(self)
+        logging.info("ReceiverChannel on_close, channel=[%s]" % (channel))
         try:
             self.app.receivers.remove(self)
         except:
@@ -276,6 +292,7 @@ class ApplicationChannel(WSC):
         self.app.get_deque(self)
 
         channel = self.app.get_self_app_channel(self)
+        logging.info("ApplicationChannel ping, channel=[%s]" % (channel))
         if channel:
             data = json.dumps(["cm", {"type": "ping", "cmd_id": 0}])
             channel.write_message(data)
@@ -284,6 +301,7 @@ class ApplicationChannel(WSC):
             threading.Timer(5, self.ping).start()
 
     def open(self, app=None):
+        logging.info("ApplicationChannel open, app=[%s]" % (app))
         super(ApplicationChannel, self).open(app)
         self.app.add_remote(self)
         self.app.get_deque(self)
@@ -292,6 +310,8 @@ class ApplicationChannel(WSC):
 
     def on_message(self, message):
         channel = self.app.get_recv_channel(self)
+        logging.info("ApplicationChannel on_message, remote=[%s]" % (self.request.remote_ip))
+        logging.info("ApplicationChannel on_message, message=[%s], channel=[%s]" % (message, channel))
         if channel:
             queue = self.app.get_deque(self)
             while len(queue) > 0:
@@ -305,6 +325,7 @@ class ApplicationChannel(WSC):
 
     def on_close(self):
         channel = self.app.get_recv_channel(self)
+        logging.info("ApplicationChannel on_close, channel=[%s]" % (channel))
         try:
             self.app.remotes.remove(self)
         except:

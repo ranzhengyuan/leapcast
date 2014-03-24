@@ -8,6 +8,7 @@ import shutil
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
+import logging
 from leapcast.services.websocket import App
 from leapcast.utils import render
 from leapcast.environment import Environment
@@ -125,6 +126,7 @@ class LEAPfactory(tornado.web.RequestHandler):
     def post(self, sec):
         '''Start app'''
         self.clear()
+        logging.info("LeapFactory post, sec=[%s]" % (sec))
         self.set_status(201)
         self.set_header('Location', self._getLocation(self.get_name()))
         status = self.get_app_status()
@@ -159,6 +161,7 @@ class LEAPfactory(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, sec):
         '''Status of an app'''
+        logging.info("LeapFactory get, sec=[%s]" % (sec))
         self.clear()
         browser = self.get_app_status()['browser']
         if not browser:
